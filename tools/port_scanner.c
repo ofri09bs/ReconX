@@ -32,9 +32,9 @@ int scan_port(const char *ip, int port , char *service) {
     if (result < 0) {
         if (errno == EINPROGRESS) {
             struct timeval timeout;
-            timeout.tv_sec = 1; // 1 seconds timeout
-            timeout.tv_usec = 0;
-
+            timeout.tv_sec = 0; // 0 seconds
+            timeout.tv_usec = 500000; // 0.5 seconds timeout
+            
             fd_set writefds;
             FD_ZERO(&writefds);
             FD_SET(sock, &writefds);
@@ -125,14 +125,21 @@ int scan_port(const char *ip, int port , char *service) {
 }
 
 
-int scan_top_ports(const char *ip) {
+int scan_top_ports(const char *ip, char *flag) {
     char service[64];
-    for (int port = 1; port <= 1024; port++) {
+    int ports_total = 1024;
+
+    printf("PORT     STATE    SERVICE\n");
+    if (flag != NULL && strcmp(flag, "-a") == 0) {
+        ports_total = 65535;
+    }
+
+    for (int port = 1; port <= ports_total; port++) {
         if (scan_port(ip, port, service) == 0) {
             printf("%d/tcp OPEN %s\n", port, service);
         }
         else {
-            printf("%d/tcp %s\n", port, service);
+            //printf("%d/tcp %s\n", port, service);
         }
 
     }

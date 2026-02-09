@@ -5,5 +5,6 @@
 #include <string.h>
 
 int starts_with(char *str, const char *prefix);
+int get_file_line_count(const char *file_path);
 
 #endif // UTILS_H
