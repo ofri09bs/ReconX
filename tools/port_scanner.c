@@ -8,8 +8,11 @@
 #include <errno.h>
 #include <sys/time.h>
 #include <fcntl.h>
+#include <pthread.h>
 #include "utils.h"
+#include "port_scanner.h"
 
+pthread_mutex_t print_mutex;
 
 int scan_port(const char *ip, int port , char *service) {
     int sock = socket(AF_INET, SOCK_STREAM, 0);
@@ -124,24 +127,44 @@ int scan_port(const char *ip, int port , char *service) {
     return 0;
 }
 
+void *scan_ports_thread(void *args) {
+    scan_args_t *scan_args = (scan_args_t *)args;
+    char service[64];
+
+    for (int port = scan_args->start_port; port <= scan_args->end_port; port++) {
+        if (scan_port(scan_args->ip, port, service) == 0) {
+            pthread_mutex_lock(&print_mutex);
+            printf("\033[34m%d\033[0m/tcp \033[32mOPEN\033[0m %s\n", port, service);
+            pthread_mutex_unlock(&print_mutex);
+        }
+    }
+    return NULL;
+}
+
 
 int scan_top_ports(const char *ip, char *flag) {
-    char service[64];
     int ports_total = 1024;
 
-    printf("PORT     STATE    SERVICE\n");
+    printf("\033[33mPORT\033[0m   \033[33mSTATE\033[0m \033[33mSERVICE\033[0m\n");
     if (flag != NULL && strcmp(flag, "-a") == 0) {
         ports_total = 65535;
     }
 
-    for (int port = 1; port <= ports_total; port++) {
-        if (scan_port(ip, port, service) == 0) {
-            printf("%d/tcp OPEN %s\n", port, service);
-        }
-        else {
-            //printf("%d/tcp %s\n", port, service);
-        }
+    int thread_count = 15;
+    pthread_t threads[thread_count];
+    scan_args_t thread_args[thread_count];
 
+    int ports_per_thread = ports_total / thread_count;
+
+    for (int i = 0; i < thread_count; i++) {
+        thread_args[i].ip = ip;
+        thread_args[i].start_port = i * ports_per_thread + 1;
+        thread_args[i].end_port = (i == thread_count - 1) ? ports_total : (i + 1) * ports_per_thread;
+        pthread_create(&threads[i], NULL, scan_ports_thread, &thread_args[i]);
+    }
+
+    for (int i = 0; i < thread_count; i++) {
+        pthread_join(threads[i], NULL);
     }
     return 0;
 }
