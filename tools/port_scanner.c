@@ -142,11 +142,15 @@ void *scan_ports_thread(void *args) {
 }
 
 
+int scan_all_ports(const char *ip) {
+    return scan_top_ports(ip, "pa");
+}
+
 int scan_top_ports(const char *ip, char *flag) {
     int ports_total = 1024;
 
     printf("\033[33mPORT\033[0m   \033[33mSTATE\033[0m \033[33mSERVICE\033[0m\n");
-    if (flag != NULL && strcmp(flag, "-a") == 0) {
+    if (flag != NULL && strcmp(flag, "pa") == 0) {
         ports_total = 65535;
     }
 
