@@ -1,4 +1,4 @@
-# ReconX v2.0 - Network Reconnaissance Tool
+# ReconX v1.1 - Network Reconnaissance Tool
 
 <pre>
 ██████╗ ███████╗ ██████╗ ██████╗ ███╗   ██╗██╗  ██╗
@@ -12,7 +12,7 @@
 **ReconX** is a lightweight, **multithreaded** network **reconnaissance** tool written in C. It combines a high-speed **Port Scanner** , **Directory Buster** and a **Ping Sweeper** into a single CLI utility, designed for CTFs, penetration testing, and educational purposes.
 
  **Note:**
- This is version **2.0** of this tool. There are a lot more **updates** and **improvements** comming soon (and a lot more **capabilities**)
+ This is version **1.1** of this tool. There are a lot more **updates** and **improvements** comming soon (and a lot more **capabilities**)
 
 ## 🚀 Features
 
