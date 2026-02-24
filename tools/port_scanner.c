@@ -12,6 +12,9 @@
 #include "utils.h"
 #include "port_scanner.h"
 
+#define RESET   "\033[0m"
+#define RED     "\033[31m"
+
 pthread_mutex_t print_mutex;
 
 int scan_port(const char *ip, int port , char *service) {
@@ -142,19 +145,47 @@ void *scan_ports_thread(void *args) {
 }
 
 
-int scan_all_ports(const char *ip) {
-    return scan_top_ports(ip, "pa");
-}
 
-int scan_top_ports(const char *ip, char *flag) {
-    int ports_total = 1024;
+int scan_ports(const char *ip, char *ports , int thread_count) {
 
-    printf("\033[33mPORT\033[0m   \033[33mSTATE\033[0m \033[33mSERVICE\033[0m\n");
-    if (flag != NULL && strcmp(flag, "pa") == 0) {
-        ports_total = 65535;
+    int ports_total = 0;
+    int start_port_num, end_port_num;
+
+    if (!is_valid_ip(ip)) {
+        fprintf(stderr, RED "Invalid IP address format. Please enter a valid IPv4 address.\n" RESET);
+        return -1;
     }
 
-    int thread_count = 15;
+    if (ports != NULL && strlen(ports) > 0) {
+        char* start_port = strtok(ports, "-"); // getting input like 1-1000
+        if (start_port == NULL) {
+            fprintf(stderr, RED "Invalid port range format. Use start-end (e.g., 1-1000).\n" RESET);
+            return -1;
+        }
+        char* end_port = strtok(NULL, "");
+
+        start_port_num = atoi(start_port);
+        end_port_num = atoi(end_port);
+        ports_total = end_port_num - start_port_num + 1;
+
+        if (ports_total <= 0 || end_port_num < start_port_num) {
+            fprintf(stderr, RED "Invalid port range. End port must be greater than or equal to start port.\n" RESET);
+            return -1;
+        }
+    }
+    else {
+        ports_total = 1024; // Default to top 1024 ports if not specified
+        start_port_num = 1;
+        end_port_num = 1024;
+    }
+
+    if (thread_count == 0 || thread_count > ports_total) {
+        thread_count = 15; // Default to 15 threads if not specified
+    }
+
+    printf("\033[33mPORT\033[0m   \033[33mSTATE\033[0m \033[33mSERVICE\033[0m\n");
+
+
     pthread_t threads[thread_count];
     scan_args_t thread_args[thread_count];
 
@@ -162,8 +193,8 @@ int scan_top_ports(const char *ip, char *flag) {
 
     for (int i = 0; i < thread_count; i++) {
         thread_args[i].ip = ip;
-        thread_args[i].start_port = i * ports_per_thread + 1;
-        thread_args[i].end_port = (i == thread_count - 1) ? ports_total : (i + 1) * ports_per_thread;
+        thread_args[i].start_port = i * ports_per_thread + 1 + start_port_num;
+        thread_args[i].end_port = (i == thread_count - 1) ? end_port_num : (i + 1) * ports_per_thread + start_port_num;
         pthread_create(&threads[i], NULL, scan_ports_thread, &thread_args[i]);
     }
 

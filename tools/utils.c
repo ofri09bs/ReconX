@@ -1,6 +1,9 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <arpa/inet.h>
+#include <unistd.h>
+
 
 
 int starts_with(char *str, const char *prefix) {
@@ -35,4 +38,10 @@ unsigned short calculate_checksum(void *b, int len) {
     sum += (sum >> 16);
     result = ~sum;
     return result;
+}
+
+
+int is_valid_ip(const char *ip) {
+    struct sockaddr_in sa;
+    return inet_pton(AF_INET, ip, &(sa.sin_addr)) > 0;
 }

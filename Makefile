@@ -7,7 +7,7 @@ SRC= tools/port_scanner.c \
 	 tools/dir_buster.c \
 	 tools/ping_sweeper.c \
 	 main.c
-OUT=build/reconx
+OUT=reconx
 
 all:
 	$(CC) $(CFLAGS) $(SRC) $(INC) -o $(OUT)

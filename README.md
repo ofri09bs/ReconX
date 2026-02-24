@@ -1,4 +1,4 @@
-# ReconX v1.1 - Network Reconnaissance Tool
+# ReconX v2.0 - Network Reconnaissance Tool
 
 <pre>
 ██████╗ ███████╗ ██████╗ ██████╗ ███╗   ██╗██╗  ██╗
@@ -12,15 +12,15 @@
 **ReconX** is a lightweight, **multithreaded** network **reconnaissance** tool written in C. It combines a high-speed **Port Scanner** , **Directory Buster** and a **Ping Sweeper** into a single CLI utility, designed for CTFs, penetration testing, and educational purposes.
 
  **Note:**
- This is version **1.1** of this tool. There are a lot more **updates** and **improvements** comming soon (and a lot more **capabilities**)
+ This is version **2.0** of this tool. There are a lot more **updates** and **improvements** comming soon (and a lot more **capabilities**)
 
-## 🚀 Features
+## Features
 
 * **Multithreaded Port Scanner**: fast TCP connect scanning using 15 concurrent threads by default.
 * **Service Version Detection**: Automatically identifies common services (SSH, HTTP, FTP, SMTP, POP3, IMAP) via banner grabbing.
 * **Directory Buster**: specific module to brute-force web server directories using a wordlist.
 * **Flexible Scanning**: Supports both Top 1024 ports and full range (1-65535) scanning.
-* **Interactive CLI**: Clean, colorized output for easy readability.
+* **Advanced Interactive CLI**: Metasploit-inspired modular interface with dynamic prompts, structured module options, and clean colorized output.
 * **Ping Sweeper**: fast, multithreaded ping sweeper , checks every IP in range of a given IP
 
 ## 📂 Project Structure
@@ -51,32 +51,48 @@ cd reconx
 ```make```
 This will compile the source code and generate the executable in build/reconx.
 
-## 💻 Usage
-Run the tool from the terminal. You must provide a target IP address and a scan mode.
+## Usage
+Run the tool from the terminal. ReconX now uses an interactive, metasploit-style CLI.
 
-## Syntax
+```./reconx```
 
-```./build/reconx <target_ip> [options]```
+After launching, you will enter the interactive console:
+``` reconx > ```
 
-## Options
-Flag | Description |
+### Core Commands
+Command | Description |
 | --- | --- |
--p | Run the Port Scanner (Top 1024 ports). |
--d | Run the Directory Buster (uses common.txt). |
--pa | Scan all ports (1-65535). |'
--s | Ping Sweep a given IP |
--h |Show the help menu. |
-
-## Examples
-
-**1. Basic Port Scan** (Top 1024 ports):```./build/reconx 192.168.1.10 -p```
-
-**2. Full Port Scan** (Ports 1-65535):```./build/reconx 10.10.10.5 -pa```
-
-**3. Directory Brute-Forcing**:```./build/reconx 192.168.1.10 -d```
+help | Show available modules |
+use <module> | Select a module |
+exit | Exit ReconX |
+show | Shows the available values to set in the selected module |
+set | Sets a value inside a module | 
+run | Runs the selected module with the selected options |
+back | Goes back to the main menu |
 
 
-**Note**: The Directory Buster defaults to port 80 and uses common.txt as the wordlist.
+### Available Modules
+Module | Description |
+| --- | --- |
+port_scanner | Scan for open TCP ports |
+dir_buster | Directory brute-forcing on web servers |
+ping_sweeper | Discover active hosts via ICMP |
+
+*More comming soon..!*
+
+## Example
+
+```
+reconx > use port_scanner
+reconx/port_scanner > show
+--- shows module options ---
+reconx/port_scanner > set TARGET 134.67.0.10
+reconx/port_scanner > set PORTS 1-5000
+reconx/port_scanner > run
+
+--- port scanner results ---
+```
+
 
 ## ⚠️ Disclaimer
 This tool is created for **educational purposes and authorized testing only**. The author is **not responsible** for any misuse or damage caused by this program. Always ensure you have permission before scanning a target.
