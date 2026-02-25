@@ -2,6 +2,7 @@
 #include "dir_buster.h"
 #include "utils.h"
 #include "ping_sweeper.h"
+#include "dns_enum.h"
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
@@ -22,7 +23,8 @@
 #define BOLD    "\033[1m"
 #define RESET   "\033[0m"
 
-#define WORDLIST_PATH "common.txt"
+#define DIR_WORDLIST_PATH "common.txt"
+#define DNS_WORDLIST_PATH "subdomains.txt"
 
 
 int handle_port_scanner() {
@@ -132,7 +134,7 @@ int handle_port_scanner() {
 int handle_dir_buster() {
     char target_ip[16] = "";
     int target_port = 80;
-    char wordlist_path[256] = WORDLIST_PATH;
+    char wordlist_path[256] = DIR_WORDLIST_PATH;
 
     while(1) {
         printf(BOLD CYAN "reconx/dir_buster > " RESET);
@@ -309,6 +311,101 @@ int handle_ping_sweeper() {
 }
 
 
+int handle_dns_enum() {
+    char target_domain[256] = "";
+    char wordlist_path[256] = DNS_WORDLIST_PATH;
+    int thread_count = 15;
+
+    while(1) {
+        printf(BOLD CYAN "reconx/dns_enum > " RESET);
+
+        char input[256];
+        if (fgets(input, sizeof(input), stdin) == NULL) {
+            printf("\n");
+            break; // Exit on EOF (Ctrl+D)
+        }
+
+        // Remove trailing newline
+        input[strcspn(input, "\n")] = 0;
+
+        char* command = strtok(input, " ");
+        if (command == NULL) {
+            continue; // No command entered
+        }
+
+        if (strcmp(command, "show") == 0) {
+            printf(YELLOW "Module Options:\n" RESET);
+            printf(" ------------------------------------------------------------\n\n");
+
+            printf("  " GREEN "%-12s" RESET RED "%-12s" RESET "%s\n",
+            "DOMAIN", "required", "The target domain to enumerate subdomains for");
+
+            printf("  " GREEN "%-12s" RESET YELLOW "%-12s" RESET "%s\n",
+            "WORDLIST", "optional", "Path to the wordlist file (Default: subdomains.txt)");
+
+            printf("  " GREEN "%-12s" RESET YELLOW "%-12s" RESET "%s\n",
+            "THREADS", "optional", "Number of threads to use (Default: 15)");
+
+            printf("\n ------------------------------------------------------------\n");
+
+        }
+
+        else if (strcmp(command, "set") == 0) {
+            char* option = strtok(NULL, " ");
+            char* value = strtok(NULL, " ");
+
+            if (option == NULL || value == NULL) {
+                printf(RED "Usage: set <option> <value>\n" RESET);
+                continue;
+            }
+            // DOMAIN option validation
+            if (strcmp(option, "DOMAIN") == 0) {
+                strncpy(target_domain, value, sizeof(target_domain));
+                target_domain[sizeof(target_domain) - 1] = '\0'; // Ensure null-termination
+                printf(GREEN "DOMAIN => %s\n" RESET, target_domain);
+            }
+            // WORDLIST option validation
+            else if (strcmp(option, "WORDLIST") == 0) {
+                strncpy(wordlist_path, value, sizeof(wordlist_path));
+                wordlist_path[sizeof(wordlist_path) - 1] = '\0'; // Ensure null-termination
+                printf(GREEN "WORDLIST => %s\n" RESET, wordlist_path);
+            }
+            // THREADS option validation
+            else if (strcmp(option, "THREADS") == 0) {
+                thread_count = atoi(value);
+                if (thread_count <= 0) {
+                    printf(RED "Invalid thread count. Please enter a positive integer.\n" RESET);
+                    continue;
+                }
+                printf(GREEN "THREADS => %d\n" RESET, thread_count);
+            }   
+
+            else {
+                printf(RED "Unknown option: %s\n" RESET, option);
+            }
+        }
+        
+        else if (strcmp(command, "run") == 0) {
+            if (strlen(target_domain) == 0) {
+                printf(RED "Please set a valid DOMAIN before running the DNS enumerator.\n" RESET);
+                continue;
+            }
+            printf(GREEN "Running DNS enumerator...\n" RESET);
+            dns_enumerate(target_domain, wordlist_path, thread_count);
+        }
+
+        else if (strcmp(command, "back") == 0) {
+            printf(YELLOW "Returning to main menu...\n" RESET);
+            break; // Exit the DNS enumerator menu
+        }
+
+        else {
+            printf(RED "Unknown command: %s\n" RESET, command);
+        }
+    }
+    return 0;
+}
+
 int main(int argc, char *argv[]) {
     (void)argc; // Unused parameter
     (void)argv; // Unused parameter
@@ -323,7 +420,7 @@ int main(int argc, char *argv[]) {
     printf("╚═╝  ╚═╝╚══════╝ ╚═════╝ ╚═════╝ ╚═╝  ╚═══╝╚═╝  ╚═╝\n");
     printf(RESET);
 
-    printf(BOLD GREEN "        ReconX Network Scanner v2.0\n" RESET);
+    printf(BOLD GREEN "        ReconX Network Scanner v2.1\n" RESET);
     printf(YELLOW "        Author: ofribs\n\n" RESET);
 
     printf(BLUE "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n" RESET);
@@ -353,10 +450,35 @@ int main(int argc, char *argv[]) {
         }
 
         if (strcmp(command, "help") == 0) {
-            printf(YELLOW "Available tools:\n" RESET);
-            printf("  " GREEN "port_scanner" RESET " - Scan for open ports on a target IP address.\n");
-            printf("  " GREEN "dir_buster" RESET " - Perform directory brute-forcing on a target web server.\n");
-            printf("  " GREEN "ping_sweeper" RESET " - Perform a ping sweep to discover active hosts in a subnet.\n");
+            printf("\n");
+            printf(BOLD CYAN "ReconX Framework Help\n" RESET);
+            printf(BLUE "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n" RESET);
+
+            /* Core Commands */
+            printf(YELLOW "Core Commands:\n" RESET);
+            printf("  " GREEN "%-18s" RESET "%s\n", "help", "Show this help menu");
+            printf("  " GREEN "%-18s" RESET "%s\n", "help <module>", "Show help for a specific module");
+            printf("  " GREEN "%-18s" RESET "%s\n", "use <module>", "Select a module");
+            printf("  " GREEN "%-18s" RESET "%s\n", "exit", "Exit ReconX");
+            printf("\n");
+
+            /* Available Modules */
+            printf(YELLOW "Available Modules:\n" RESET);
+            printf("  " GREEN "%-18s" RESET "%s\n", "port_scanner", "Scan for open TCP ports");
+            printf("  " GREEN "%-18s" RESET "%s\n", "dir_buster", "Directory brute-forcing on web servers");
+            printf("  " GREEN "%-18s" RESET "%s\n", "ping_sweeper", "Discover active hosts via ICMP");
+            printf("  " GREEN "%-18s" RESET "%s\n", "dns_enum", "Enumerate subdomains using a wordlist");
+            printf("\n");
+
+            /* Basic Workflow */
+            printf(YELLOW "Basic Workflow:\n" RESET);
+            printf("  " CYAN "1." RESET " use <module>\n");
+            printf("  " CYAN "2." RESET " show\n");
+            printf("  " CYAN "3." RESET " set <OPTION> <VALUE>\n");
+            printf("  " CYAN "4." RESET " run\n");
+            printf("  " CYAN "5." RESET " back\n");
+            printf("\n");
+            
             continue;
         }
 
@@ -376,6 +498,9 @@ int main(int argc, char *argv[]) {
             }
             else if (strcmp(tool, "ping_sweeper") == 0) {
                 handle_ping_sweeper();
+            }
+             else if (strcmp(tool, "dns_enum") == 0) {
+                handle_dns_enum();
             }
              else {
                 printf(RED "Unknown tool: %s\n" RESET, tool);

@@ -1,4 +1,4 @@
-# ReconX v2.0 - Network Reconnaissance Tool
+# ReconX v2.1 - Network Reconnaissance Tool
 
 <pre>
 ██████╗ ███████╗ ██████╗ ██████╗ ███╗   ██╗██╗  ██╗
@@ -9,10 +9,10 @@
 ╚═╝  ╚═╝╚══════╝ ╚═════╝ ╚═════╝ ╚═╝  ╚═══╝╚═╝  ╚═╝
 </pre>
 
-**ReconX** is a lightweight, **multithreaded** network **reconnaissance** tool written in C. It combines a high-speed **Port Scanner** , **Directory Buster** and a **Ping Sweeper** into a single CLI utility, designed for CTFs, penetration testing, and educational purposes.
+**ReconX** is a lightweight, **multithreaded** network **reconnaissance** tool written in C. It combines a high-speed **Port Scanner** , **Directory Buster** , **Ping Sweeper** and a **DNS Enumerator** into a single CLI utility, designed for CTFs, penetration testing, and educational purposes.
 
  **Note:**
- This is version **2.0** of this tool. There are a lot more **updates** and **improvements** comming soon (and a lot more **capabilities**)
+ This is version **2.1** of this tool. There are a lot more **updates** and **improvements** comming soon (and a lot more **capabilities**)
 
 ## Features
 
@@ -22,6 +22,7 @@
 * **Flexible Scanning**: Supports both Top 1024 ports and full range (1-65535) scanning.
 * **Advanced Interactive CLI**: Metasploit-inspired modular interface with dynamic prompts, structured module options, and clean colorized output.
 * **Ping Sweeper**: fast, multithreaded ping sweeper , checks every IP in range of a given IP
+* **DNS Enumerator**: Scans quickly DNS Subdomains of a given domain
 
 ## 📂 Project Structure
 
@@ -32,6 +33,7 @@
 │   ├── port_scanner.c
 │   ├── dir_buster.c
 │   ├── ping_sweeper.c
+│   ├── dns_enum.c
 │   └── utils.c
 ├── main.c             # Entry point and argument parsing
 ├── Makefile           # Build configuration
@@ -77,6 +79,7 @@ Module | Description |
 port_scanner | Scan for open TCP ports |
 dir_buster | Directory brute-forcing on web servers |
 ping_sweeper | Discover active hosts via ICMP |
+dns_enum | Scan for DNS Subdomains |
 
 *More comming soon..!*
 
