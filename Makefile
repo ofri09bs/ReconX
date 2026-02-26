@@ -7,6 +7,7 @@ SRC= tools/port_scanner.c \
 	 tools/dir_buster.c \
 	 tools/ping_sweeper.c \
 	 tools/dns_enum.c \
+	 tools/service_grabber.c \
 	 main.c
 OUT=reconx
 

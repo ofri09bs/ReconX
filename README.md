@@ -1,4 +1,4 @@
-# ReconX v2.1 - Network Reconnaissance Tool
+# ReconX v2.2 - Network Reconnaissance Tool
 
 <pre>
 ██████╗ ███████╗ ██████╗ ██████╗ ███╗   ██╗██╗  ██╗
@@ -9,10 +9,8 @@
 ╚═╝  ╚═╝╚══════╝ ╚═════╝ ╚═════╝ ╚═╝  ╚═══╝╚═╝  ╚═╝
 </pre>
 
-**ReconX** is a lightweight, **multithreaded** network **reconnaissance** tool written in C. It combines a high-speed **Port Scanner** , **Directory Buster** , **Ping Sweeper** and a **DNS Enumerator** into a single CLI utility, designed for CTFs, penetration testing, and educational purposes.
+**ReconX** is a lightweight, **multithreaded** network **reconnaissance** tool written in C. It combines a high-speed **Port Scanner** , **Directory Buster** , **Ping Sweeper** , **DNS Enumerator** and a **Services Grabber** into a single CLI utility, designed for CTFs, penetration testing, and educational purposes.
 
- **Note:**
- This is version **2.1** of this tool. There are a lot more **updates** and **improvements** comming soon (and a lot more **capabilities**)
 
 ## Features
 
@@ -23,6 +21,7 @@
 * **Advanced Interactive CLI**: Metasploit-inspired modular interface with dynamic prompts, structured module options, and clean colorized output.
 * **Ping Sweeper**: fast, multithreaded ping sweeper , checks every IP in range of a given IP
 * **DNS Enumerator**: Scans quickly DNS Subdomains of a given domain
+* **Service Grabber**: Makes a comprehensive scan on a port and checking for 17 diffrent popular services (HTTP/S, SSH, FTP, SMTP, SMB, MYSQL, REDIS and more..)
 
 ## 📂 Project Structure
 
@@ -34,6 +33,7 @@
 │   ├── dir_buster.c
 │   ├── ping_sweeper.c
 │   ├── dns_enum.c
+│   ├── service_grabber.c
 │   └── utils.c
 ├── main.c             # Entry point and argument parsing
 ├── Makefile           # Build configuration
@@ -80,6 +80,7 @@ port_scanner | Scan for open TCP ports |
 dir_buster | Directory brute-forcing on web servers |
 ping_sweeper | Discover active hosts via ICMP |
 dns_enum | Scan for DNS Subdomains |
+service_grabber | Scans a given port for the service running on it |
 
 *More comming soon..!*
 

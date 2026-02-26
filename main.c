@@ -3,6 +3,7 @@
 #include "utils.h"
 #include "ping_sweeper.h"
 #include "dns_enum.h"
+#include "service_grabber.h"
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
@@ -125,7 +126,6 @@ int handle_port_scanner() {
         else {
             printf(RED "Unknown command: %s\n" RESET, command);
         }
-        printf(BOLD CYAN "reconx/port_scanner > " RESET);
     }
 
     return 0;
@@ -406,6 +406,102 @@ int handle_dns_enum() {
     return 0;
 }
 
+
+int handle_service_grabber() {
+    char target_ip[16] = "";
+    int target_port = 0;
+
+    while(1) {
+        printf(BOLD CYAN "reconx/service_grabber > " RESET);
+
+        char input[256];
+        if (fgets(input, sizeof(input), stdin) == NULL) {
+            printf("\n");
+            break; // Exit on EOF (Ctrl+D)
+        }
+
+        // Remove trailing newline
+        input[strcspn(input, "\n")] = 0;
+
+        char* command = strtok(input, " ");
+        if (command == NULL) {
+            continue; // No command entered
+        }
+
+        if (strcmp(command, "show") == 0) {
+            printf(YELLOW "Module Options:\n" RESET);
+            printf(" ------------------------------------------------------------\n\n");
+
+            printf("  " GREEN "%-12s" RESET RED "%-12s" RESET "%s\n",
+            "TARGET", "required", "The target IP address to grab service info from");
+
+            printf("  " GREEN "%-12s" RESET RED "%-12s" RESET "%s\n",
+            "PORT", "required", "The target port to grab service info from");
+
+            printf("\n ------------------------------------------------------------\n");
+
+        }
+
+        else if (strcmp(command, "set") == 0) {
+            char* option = strtok(NULL, " ");
+            char* value = strtok(NULL, " ");
+
+            if (option == NULL || value == NULL) {
+                printf(RED "Usage: set <option> <value>\n" RESET);
+                continue;
+            }
+            // TARGET option validation
+            if (strcmp(option, "TARGET") == 0) {
+
+                if (!is_valid_ip(value)) {
+                    printf(RED "Invalid IP address format. Please enter a valid IPv4 address.\n" RESET);
+                    continue;
+                }
+
+                strncpy(target_ip, value, sizeof(target_ip));
+                target_ip[sizeof(target_ip) - 1] = '\0'; // Ensure null-termination
+                printf(GREEN "TARGET => %s\n" RESET, target_ip);
+            }
+            // PORT option validation
+            else if (strcmp(option, "PORT") == 0) {
+                target_port = atoi(value);
+                if (target_port <= 0 || target_port > 65535) {
+                    printf(RED "Invalid port number. Please enter a value between 1 and 65535.\n" RESET);
+                    continue;
+                }
+                printf(GREEN "PORT => %d\n" RESET, target_port);
+            }
+            
+            else {
+                printf(RED "Unknown option: %s\n" RESET, option);
+            }
+        }
+        
+        else if (strcmp(command, "run") == 0) {
+            if (strlen(target_ip) == 0) {
+                printf(RED "Please set a valid TARGET IP address before running the service grabber.\n" RESET);
+                continue;
+            }
+            if (target_port <= 0 || target_port > 65535) {
+                printf(RED "Please set a valid PORT number between 1 and 65535 before running the service grabber.\n" RESET);
+                continue;
+            }
+            printf(GREEN "Running service grabber...\n" RESET);
+            grab_service_info(target_ip, target_port);
+        }
+
+        else if (strcmp(command, "back") == 0) {
+            printf(YELLOW "Returning to main menu...\n" RESET);
+            break; // Exit the service grabber menu
+        }
+
+        else {
+            printf(RED "Unknown command: %s\n" RESET, command);
+        }
+    }
+    return 0;
+}
+
 int main(int argc, char *argv[]) {
     (void)argc; // Unused parameter
     (void)argv; // Unused parameter
@@ -420,7 +516,7 @@ int main(int argc, char *argv[]) {
     printf("╚═╝  ╚═╝╚══════╝ ╚═════╝ ╚═════╝ ╚═╝  ╚═══╝╚═╝  ╚═╝\n");
     printf(RESET);
 
-    printf(BOLD GREEN "        ReconX Network Scanner v2.1\n" RESET);
+    printf(BOLD GREEN "        ReconX Network Scanner v2.2\n" RESET);
     printf(YELLOW "        Author: ofribs\n\n" RESET);
 
     printf(BLUE "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n" RESET);
@@ -457,7 +553,6 @@ int main(int argc, char *argv[]) {
             /* Core Commands */
             printf(YELLOW "Core Commands:\n" RESET);
             printf("  " GREEN "%-18s" RESET "%s\n", "help", "Show this help menu");
-            printf("  " GREEN "%-18s" RESET "%s\n", "help <module>", "Show help for a specific module");
             printf("  " GREEN "%-18s" RESET "%s\n", "use <module>", "Select a module");
             printf("  " GREEN "%-18s" RESET "%s\n", "exit", "Exit ReconX");
             printf("\n");
@@ -468,6 +563,7 @@ int main(int argc, char *argv[]) {
             printf("  " GREEN "%-18s" RESET "%s\n", "dir_buster", "Directory brute-forcing on web servers");
             printf("  " GREEN "%-18s" RESET "%s\n", "ping_sweeper", "Discover active hosts via ICMP");
             printf("  " GREEN "%-18s" RESET "%s\n", "dns_enum", "Enumerate subdomains using a wordlist");
+            printf("  " GREEN "%-18s" RESET "%s\n", "service_grabber", "Grab service information from open ports");
             printf("\n");
 
             /* Basic Workflow */
@@ -501,6 +597,9 @@ int main(int argc, char *argv[]) {
             }
              else if (strcmp(tool, "dns_enum") == 0) {
                 handle_dns_enum();
+            }
+             else if (strcmp(tool, "service_grabber") == 0) {
+                handle_service_grabber();
             }
              else {
                 printf(RED "Unknown tool: %s\n" RESET, tool);
