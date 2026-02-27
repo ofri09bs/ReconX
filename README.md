@@ -1,4 +1,4 @@
-# ReconX v2.2 - Network Reconnaissance Tool
+# ReconX v2.3 - Network Reconnaissance Tool
 
 <pre>
 ██████╗ ███████╗ ██████╗ ██████╗ ███╗   ██╗██╗  ██╗

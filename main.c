@@ -597,7 +597,7 @@ int main(int argc, char *argv[]) {
     printf("╚═╝  ╚═╝╚══════╝ ╚═════╝ ╚═════╝ ╚═╝  ╚═══╝╚═╝  ╚═╝\n");
     printf(RESET);
 
-    printf(BOLD GREEN "        ReconX Network Scanner v2.2\n" RESET);
+    printf(BOLD GREEN "        ReconX Network Scanner v2.3\n" RESET);
     printf(YELLOW "        Author: ofribs\n\n" RESET);
 
     printf(BLUE "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n" RESET);
