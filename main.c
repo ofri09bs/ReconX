@@ -4,8 +4,10 @@
 #include "ping_sweeper.h"
 #include "dns_enum.h"
 #include "service_grabber.h"
+#include "lan_sniffer.h"
 #include <stdio.h>
 #include <string.h>
+#include <stddef.h>
 #include <unistd.h>
 #include <arpa/inet.h>
 #include <sys/socket.h>
@@ -24,8 +26,8 @@
 #define BOLD    "\033[1m"
 #define RESET   "\033[0m"
 
-#define DIR_WORDLIST_PATH "common.txt"
-#define DNS_WORDLIST_PATH "subdomains.txt"
+#define DIR_WORDLIST_PATH "wordlists/common.txt"
+#define DNS_WORDLIST_PATH "wordlists/subdomains.txt"
 
 
 int handle_port_scanner() {
@@ -114,7 +116,7 @@ int handle_port_scanner() {
                 printf(RED "Please set a valid TARGET IP address before running the port scanner.\n" RESET);
                 continue;
             }
-            printf(GREEN "Running port scanner...\n" RESET);
+            printf(YELLOW "Running port scanner...\n" RESET);
             scan_ports(target_ip, ports, thread_count);
         }
 
@@ -216,7 +218,7 @@ int handle_dir_buster() {
                 printf(RED "Please set a valid TARGET IP address before running the directory buster.\n" RESET);
                 continue;
             }
-            printf(GREEN "Running directory buster...\n" RESET);
+            printf(YELLOW "Running directory buster...\n" RESET);
             start_dir_buster(target_ip, target_port, wordlist_path);
         }
 
@@ -293,7 +295,7 @@ int handle_ping_sweeper() {
                 printf(RED "Please set a valid TARGET IP address before running the ping sweeper.\n" RESET);
                 continue;
             }
-            printf(GREEN "Running ping sweeper...\n" RESET);
+            printf(YELLOW "Running ping sweeper...\n" RESET);
             ping_sweep(target_ip);
         }
 
@@ -390,7 +392,7 @@ int handle_dns_enum() {
                 printf(RED "Please set a valid DOMAIN before running the DNS enumerator.\n" RESET);
                 continue;
             }
-            printf(GREEN "Running DNS enumerator...\n" RESET);
+            printf(YELLOW "Running DNS enumerator...\n" RESET);
             dns_enumerate(target_domain, wordlist_path, thread_count);
         }
 
@@ -486,7 +488,7 @@ int handle_service_grabber() {
                 printf(RED "Please set a valid PORT number between 1 and 65535 before running the service grabber.\n" RESET);
                 continue;
             }
-            printf(GREEN "Running service grabber...\n" RESET);
+            printf(YELLOW "Running service grabber...\n" RESET);
             grab_service_info(target_ip, target_port);
         }
 
@@ -495,6 +497,85 @@ int handle_service_grabber() {
             break; // Exit the service grabber menu
         }
 
+        else {
+            printf(RED "Unknown command: %s\n" RESET, command);
+        }
+    }
+    return 0;
+}
+
+int handle_lan_sniffer() {
+    char iface[256] = "";
+
+    while(1) {
+        printf(BOLD CYAN "reconx/lan_sniffer > " RESET);
+
+        //check if program is run with root privileges
+        if (geteuid() != 0) {
+            printf(RED "Error: LAN sniffer requires root privileges to run.\n" RESET);
+            printf(RED "Please run the program as root or with sudo.\n" RESET);
+            return -1;
+        }
+
+        char input[256];
+        if (fgets(input, sizeof(input), stdin) == NULL) {
+            printf("\n");
+            break; // Exit on EOF (Ctrl+D)
+        }
+
+        // Remove trailing newline
+        input[strcspn(input, "\n")] = 0;
+
+        char* command = strtok(input, " ");
+        if (command == NULL) {
+            continue; // No command entered
+        }
+
+        if (strcmp(command, "show") == 0) {
+            printf(YELLOW "Module Options:\n" RESET);
+            printf(" ------------------------------------------------------------\n\n");
+
+            printf("  " GREEN "%-12s" RESET RED "%-12s" RESET "%s\n",
+            "IFACE", "required", "The network interface to sniff on (you can find this using 'ip addr' command)");
+
+            printf("\n ------------------------------------------------------------\n");
+
+        }
+
+        else if (strcmp(command, "set") == 0) {
+            char* option = strtok(NULL, " ");
+            char* value = strtok(NULL, " ");
+
+            if (option == NULL || value == NULL) {
+                printf(RED "Usage: set <option> <value>\n" RESET);
+                continue;
+            }
+            // IFACE option validation
+            if (strcmp(option, "IFACE") == 0) {
+                strncpy(iface, value, sizeof(iface));
+                iface[sizeof(iface) - 1] = '\0'; // Ensure null-termination
+                printf(GREEN "IFACE => %s\n" RESET, iface);
+            }
+
+            else {
+                printf(RED "Unknown option: %s\n" RESET, option);
+            }
+        }
+
+        else if (strcmp(command, "run") == 0) {
+            if (strlen(iface) == 0) {
+                printf(RED "Please set a valid IFACE before running the LAN sniffer.\n" RESET);
+                continue;
+            }
+            printf(YELLOW "Running LAN sniffer...\n" RESET);
+            start_lan_sniffer(iface);
+        }
+
+        else if (strcmp(command, "back") == 0) {
+            printf(YELLOW "Returning to main menu...\n" RESET);
+            break; // Exit the LAN sniffer menu
+        }
+        
         else {
             printf(RED "Unknown command: %s\n" RESET, command);
         }
@@ -584,8 +665,7 @@ int main(int argc, char *argv[]) {
         }
 
         if (strcmp(command, "use") == 0) {
-            printf(YELLOW "[*] Module selected: %s\n" RESET, tool);
-
+            
             if (strcmp(tool, "port_scanner") == 0) {
                 handle_port_scanner();
             }
@@ -600,6 +680,9 @@ int main(int argc, char *argv[]) {
             }
              else if (strcmp(tool, "service_grabber") == 0) {
                 handle_service_grabber();
+            }
+            else if (strcmp(tool, "lan_sniffer") == 0) {
+                handle_lan_sniffer();
             }
              else {
                 printf(RED "Unknown tool: %s\n" RESET, tool);

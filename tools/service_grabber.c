@@ -480,6 +480,9 @@ int grab_service_info(const char* ip, int port) {
             printf("Service on %s:%d =>" YELLOW " Unknown Service\n" RESET, ip, port);
         }
     }
+    else if (bytes_received == 0) {
+        printf(RED "Service on %s:%d => Connection closed by server (TCP FIN)\n" RESET, ip, port);
+    }
     else {
         printf(RED "Service on %s:%d => No response or error\n" RESET, ip, port);
     }

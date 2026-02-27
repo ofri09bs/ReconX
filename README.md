@@ -9,7 +9,7 @@
 ╚═╝  ╚═╝╚══════╝ ╚═════╝ ╚═════╝ ╚═╝  ╚═══╝╚═╝  ╚═╝
 </pre>
 
-**ReconX** is a lightweight, **multithreaded** network **reconnaissance** tool written in C. It combines a high-speed **Port Scanner** , **Directory Buster** , **Ping Sweeper** , **DNS Enumerator** and a **Services Grabber** into a single CLI utility, designed for CTFs, penetration testing, and educational purposes.
+**ReconX** is a lightweight, **multithreaded** network **reconnaissance** tool written in C. It combines a high-speed **Port Scanner** , **Directory Buster** , **Ping Sweeper** , **DNS Enumerator**, **Services Grabber** and a **LAN Sniffer** into a single CLI utility, designed for CTFs, penetration testing, and educational purposes.
 
 
 ## Features
@@ -22,6 +22,7 @@
 * **Ping Sweeper**: fast, multithreaded ping sweeper , checks every IP in range of a given IP
 * **DNS Enumerator**: Scans quickly DNS Subdomains of a given domain
 * **Service Grabber**: Makes a comprehensive scan on a port and checking for 17 diffrent popular services (HTTP/S, SSH, FTP, SMTP, SMB, MYSQL, REDIS and more..)
+* **LAN Sniffer**: Sniffes packets in the host network and extracts from them the MAC and IP addresses (that are from/to the host network)
 
 ## 📂 Project Structure
 
@@ -34,6 +35,7 @@
 │   ├── ping_sweeper.c
 │   ├── dns_enum.c
 │   ├── service_grabber.c
+│   ├── lan_sniffer.c
 │   └── utils.c
 ├── main.c             # Entry point and argument parsing
 ├── Makefile           # Build configuration
@@ -81,6 +83,7 @@ dir_buster | Directory brute-forcing on web servers |
 ping_sweeper | Discover active hosts via ICMP |
 dns_enum | Scan for DNS Subdomains |
 service_grabber | Scans a given port for the service running on it |
+lan_sniffer | Sniffs the LAN and prints MAC and IP addresses |
 
 *More comming soon..!*
 
