@@ -5,6 +5,7 @@
 #include "dns_enum.h"
 #include "service_grabber.h"
 #include "lan_sniffer.h"
+#include "arp_poisoner.h"
 #include <stdio.h>
 #include <string.h>
 #include <stddef.h>
@@ -583,6 +584,108 @@ int handle_lan_sniffer() {
     return 0;
 }
 
+
+int handle_arp_poisoner() {
+    char iface[256] = "";
+    char target_ip[16] = "";
+
+    printf(YELLOW BOLD "Please make sure to enable IP forwarding on your system before running the ARP poisoner:\n" RESET);
+    printf(YELLOW "sudo sysctl -w net.ipv4.ip_forward=1\n" RESET);
+
+    while(1) {
+        printf(BOLD CYAN "reconx/arp_poisoner > " RESET);
+
+        //check if program is run with root privileges
+        if (geteuid() != 0) {
+            printf(RED "Error: ARP poisoner requires root privileges to run.\n" RESET);
+            printf(RED "Please run the program as root or with sudo.\n" RESET);
+            return -1;
+        }
+
+        char input[256];
+        if (fgets(input, sizeof(input), stdin) == NULL) {
+            printf("\n");
+            break; // Exit on EOF (Ctrl+D)
+        }
+
+        // Remove trailing newline
+        input[strcspn(input, "\n")] = 0;
+
+        char* command = strtok(input, " ");
+        if (command == NULL) {
+            continue; // No command entered
+        }
+
+        if (strcmp(command, "show") == 0) {
+            printf(YELLOW "Module Options:\n" RESET);
+            printf(" ------------------------------------------------------------\n\n");
+
+            printf("  " GREEN "%-12s" RESET RED "%-12s" RESET "%s\n",
+            "IFACE", "required", "The network interface to use for ARP poisoning (you can find this using 'ip addr' command)");
+
+            printf("  " GREEN "%-12s" RESET RED "%-12s" RESET "%s\n",
+            "TARGET", "required", "The target IP address to poison");
+
+            printf("\n ------------------------------------------------------------\n");
+
+        }
+
+        else if (strcmp(command, "set") == 0) {
+            char* option = strtok(NULL, " ");
+            char* value = strtok(NULL, " ");
+
+            if (option == NULL || value == NULL) {
+                printf(RED "Usage: set <option> <value>\n" RESET);
+                continue;
+            }
+            // IFACE option validation
+            if (strcmp(option, "IFACE") == 0) {
+                strncpy(iface, value, sizeof(iface));
+                iface[sizeof(iface) - 1] = '\0'; // Ensure null-termination
+                printf(GREEN "IFACE => %s\n" RESET, iface);
+            }
+             // TARGET option validation
+             else if (strcmp(option, "TARGET") == 0) { 
+                
+                if (!is_valid_ip(value)) {
+                    printf(RED "Invalid IP address format. Please enter a valid IPv4 address.\n" RESET);
+                    continue;
+                }
+
+                strncpy(target_ip, value, sizeof(target_ip));
+                target_ip[sizeof(target_ip) - 1] = '\0'; // Ensure null-termination
+                printf(GREEN "TARGET => %s\n" RESET, target_ip);
+            }
+            else {
+                printf(RED "Unknown option: %s\n" RESET, option);
+            }
+        }
+        
+        else if (strcmp(command, "run") == 0) {
+            if (strlen(iface) == 0) {
+                printf(RED "Please set a valid IFACE before running the ARP poisoner.\n" RESET);
+                continue;
+            }
+            if (strlen(target_ip) == 0) {
+                printf(RED "Please set a valid TARGET IP address before running the ARP poisoner.\n" RESET);
+                continue;
+            }
+            printf(YELLOW "Running ARP poisoner...\n" RESET);
+            start_arp_poisoner(iface, target_ip);
+        }
+
+        else if (strcmp(command, "back") == 0) {
+            printf(YELLOW "Returning to main menu...\n" RESET);
+            break; // Exit the ARP poisoner menu
+        }
+
+        else {
+            printf(RED "Unknown command: %s\n" RESET, command);
+        }
+    }
+    return 0;
+}
+
 int main(int argc, char *argv[]) {
     (void)argc; // Unused parameter
     (void)argv; // Unused parameter
@@ -645,6 +748,8 @@ int main(int argc, char *argv[]) {
             printf("  " GREEN "%-18s" RESET "%s\n", "ping_sweeper", "Discover active hosts via ICMP");
             printf("  " GREEN "%-18s" RESET "%s\n", "dns_enum", "Enumerate subdomains using a wordlist");
             printf("  " GREEN "%-18s" RESET "%s\n", "service_grabber", "Grab service information from open ports");
+            printf("  " GREEN "%-18s" RESET "%s\n", "lan_sniffer", "Sniff LAN traffic on a specified interface");
+            printf("  " GREEN "%-18s" RESET "%s\n", "arp_poisoner", "Perform ARP poisoning for MITM attacks");
             printf("\n");
 
             /* Basic Workflow */
@@ -683,6 +788,9 @@ int main(int argc, char *argv[]) {
             }
             else if (strcmp(tool, "lan_sniffer") == 0) {
                 handle_lan_sniffer();
+            }
+             else if (strcmp(tool, "arp_poisoner") == 0) {
+                handle_arp_poisoner();
             }
              else {
                 printf(RED "Unknown tool: %s\n" RESET, tool);

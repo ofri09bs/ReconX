@@ -33,6 +33,11 @@ char* get_service_name(int service_type) {
     }
 }
 
+void parse_mac(const char* mac_str, unsigned char* mac_bytes) {
+    sscanf(mac_str, "%hhx:%hhx:%hhx:%hhx:%hhx:%hhx",
+           &mac_bytes[0], &mac_bytes[1], &mac_bytes[2],
+           &mac_bytes[3], &mac_bytes[4], &mac_bytes[5]);
+}
 
 int open_socket(const char* ip, int port) {
     int sockfd;

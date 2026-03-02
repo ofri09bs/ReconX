@@ -10,5 +10,6 @@ unsigned short calculate_checksum(void *b, int len);
 int is_valid_ip(const char *ip);
 int open_socket(const char* ip, int port);
 char* get_service_name(int service_type);
+void parse_mac(const char* mac_str, unsigned char* mac_bytes);
 
 #endif // UTILS_H

@@ -9,7 +9,7 @@
 ╚═╝  ╚═╝╚══════╝ ╚═════╝ ╚═════╝ ╚═╝  ╚═══╝╚═╝  ╚═╝
 </pre>
 
-**ReconX** is a lightweight, **multithreaded** network **reconnaissance** tool written in C. It combines a high-speed **Port Scanner** , **Directory Buster** , **Ping Sweeper** , **DNS Enumerator**, **Services Grabber** and a **LAN Sniffer** into a single CLI utility, designed for CTFs, penetration testing, and educational purposes.
+**ReconX** is a lightweight, **multithreaded** network **reconnaissance** tool written in C. It combines a high-speed **Port Scanner** , **Directory Buster** , **Ping Sweeper** , **DNS Enumerator**, **Services Grabber**, **LAN Sniffer** and a **ARP Poisoner** into a single CLI utility, designed for CTFs, penetration testing, and educational purposes.
 
 
 ## Features
@@ -23,6 +23,7 @@
 * **DNS Enumerator**: Scans quickly DNS Subdomains of a given domain
 * **Service Grabber**: Makes a comprehensive scan on a port and checking for 17 diffrent popular services (HTTP/S, SSH, FTP, SMTP, SMB, MYSQL, REDIS and more..)
 * **LAN Sniffer**: Sniffes packets in the host network and extracts from them the MAC and IP addresses (that are from/to the host network)
+* **ARP Poisoner**: Sends ARP replies on the local network to manipulate IP-to-MAC mappings between devices, And then acts as a MiTM and sniffes packets
 
 ## 📂 Project Structure
 
@@ -36,6 +37,7 @@
 │   ├── dns_enum.c
 │   ├── service_grabber.c
 │   ├── lan_sniffer.c
+│   ├── arp_poisoner.c
 │   └── utils.c
 ├── main.c             # Entry point and argument parsing
 ├── Makefile           # Build configuration
@@ -84,6 +86,7 @@ ping_sweeper | Discover active hosts via ICMP |
 dns_enum | Scan for DNS Subdomains |
 service_grabber | Scans a given port for the service running on it |
 lan_sniffer | Sniffs the LAN and prints MAC and IP addresses |
+arp_poisoner | Manipulates IP-to-MAC mappings between devices and sniffes packets |
 
 *More comming soon..!*
 
