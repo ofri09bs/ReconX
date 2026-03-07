@@ -1,3 +1,6 @@
+// Enabled GNU extensions for features like TCP_INFO (just to remove warnings, not strictly necessary for this code)
+#define _GNU_SOURCE
+
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netinet/tcp.h>
@@ -11,7 +14,6 @@
 #include <sys/time.h>
 #include <fcntl.h>
 #include <pthread.h>
-#include <linux/tcp.h>
 #include "utils.h"
 #include "port_scanner.h"
 
