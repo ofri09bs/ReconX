@@ -11,6 +11,7 @@
 #include <sys/time.h>
 #include <fcntl.h>
 #include <pthread.h>
+#include <linux/tcp.h>
 #include "utils.h"
 #include "port_scanner.h"
 
