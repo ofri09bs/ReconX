@@ -9,12 +9,12 @@
 ╚═╝  ╚═╝╚══════╝ ╚═════╝ ╚═════╝ ╚═╝  ╚═══╝╚═╝  ╚═╝
 </pre>
 
-**ReconX** is a lightweight, **multithreaded** network **reconnaissance** tool written in C. It combines a high-speed **Port Scanner** , **Directory Buster** , **Ping Sweeper** , **DNS Enumerator**, **Services Grabber**, **LAN Sniffer** and a **ARP Poisoner** into a single CLI utility, designed for CTFs, penetration testing, and educational purposes.
+**ReconX** is a lightweight, **multithreaded** network **reconnaissance** tool written in C. It combines a high-speed **Port Scanner with SYN Scan** , **Directory Buster** , **Ping Sweeper** , **DNS Enumerator**, **Services Grabber**, **LAN Sniffer** and a **ARP Poisoner** into a single CLI utility, designed for CTFs, penetration testing, and educational purposes.
 
 
 ## Features
 
-* **Multithreaded Port Scanner**: fast TCP connect scanning using 15 concurrent threads by default.
+* **Multithreaded Port Scanner**: fast TCP connect scanning using 15 concurrent threads by default , can also do a stealthy SYN Scan
 * **Service Version Detection**: Automatically identifies common services (SSH, HTTP, FTP, SMTP, POP3, IMAP) via banner grabbing.
 * **Directory Buster**: specific module to brute-force web server directories using a wordlist.
 * **Flexible Scanning**: Supports both Top 1024 ports and full range (1-65535) scanning.

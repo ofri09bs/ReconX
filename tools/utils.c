@@ -105,3 +105,32 @@ int is_valid_ip(const char *ip) {
     struct sockaddr_in sa;
     return inet_pton(AF_INET, ip, &(sa.sin_addr)) > 0;
 }
+
+// uses a UDP socket to determine the local IP address by connecting to a public DNS server 
+int get_local_ip(const char* target_ip, char* local_ip_buffer) {
+    int sock = socket(AF_INET, SOCK_DGRAM, 0);
+    if (sock < 0) return -1;
+
+    struct sockaddr_in serv;
+    memset(&serv, 0, sizeof(serv));
+    serv.sin_family = AF_INET;
+    serv.sin_port = htons(53);
+    inet_pton(AF_INET, target_ip, &serv.sin_addr);
+
+    if (connect(sock, (struct sockaddr*)&serv, sizeof(serv)) < 0) {
+        close(sock);
+        return -1;
+    }
+
+    struct sockaddr_in name;
+    socklen_t namelen = sizeof(name);
+    if (getsockname(sock, (struct sockaddr*)&name, &namelen) < 0) {
+        close(sock);
+        return -1;
+    }
+
+    inet_ntop(AF_INET, &name.sin_addr, local_ip_buffer, INET_ADDRSTRLEN);
+    
+    close(sock);
+    return 0;
+}

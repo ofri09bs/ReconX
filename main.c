@@ -36,6 +36,7 @@ int handle_port_scanner() {
     char target_ip[16] = "";
     char ports[256] = "";
     int thread_count = 15;
+    int syn_scan = 0;
 
     while(1) {
         printf(BOLD CYAN "reconx/port_scanner > " RESET);
@@ -66,6 +67,9 @@ int handle_port_scanner() {
 
             printf("  " GREEN "%-12s" RESET YELLOW "%-12s" RESET "%s\n",
             "THREADS", "optional", "Number of threads to use (Default: 15)");
+
+            printf("  " GREEN "%-12s" RESET YELLOW "%-12s" RESET "%s\n",
+            "SYN", "optional", "Perform SYN scan (Default: 0)");
 
             printf("\n ------------------------------------------------------------\n");
 
@@ -106,6 +110,21 @@ int handle_port_scanner() {
                 }
                 printf(GREEN "THREADS => %d\n" RESET, thread_count);
             }
+            // SYN option validation
+            else if (strcmp(option, "SYN") == 0) {
+                if (strcmp(value, "1") == 0 || strcmp(value, "true") == 0) {
+                    syn_scan = 1;
+                    printf(GREEN "SYN scan enabled\n" RESET);
+                }
+                else if (strcmp(value, "0") == 0 || strcmp(value, "false") == 0) {
+                    syn_scan = 0;
+                    printf(GREEN "SYN scan disabled\n" RESET);
+                }
+                else {
+                    printf(RED "Invalid value for SYN option. Use 1/true to enable or 0/false to disable.\n" RESET);
+                    continue;
+                }
+            }
 
             else {
                 printf(RED "Unknown option: %s\n" RESET, option);
@@ -118,7 +137,13 @@ int handle_port_scanner() {
                 continue;
             }
             printf(YELLOW "Running port scanner...\n" RESET);
-            scan_ports(target_ip, ports, thread_count);
+            if (syn_scan) {
+                if (getuid() != 0) {
+                    printf(RED "SYN scan requires root privileges. Please run the program as root to use this feature.\n" RESET);
+                    continue;
+                }
+            }
+            scan_ports(target_ip, ports, thread_count, syn_scan);
         }
 
         else if (strcmp(command, "back") == 0) {
