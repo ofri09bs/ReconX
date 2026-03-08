@@ -6,6 +6,7 @@
 #include "service_grabber.h"
 #include "lan_sniffer.h"
 #include "arp_poisoner.h"
+#include "crtsh.h"
 #include <stdio.h>
 #include <string.h>
 #include <stddef.h>
@@ -711,6 +712,78 @@ int handle_arp_poisoner() {
     return 0;
 }
 
+int handle_crtsh() {
+    char target_domain[256] = "";
+
+    while(1) {
+        printf(BOLD CYAN "reconx/crtsh > " RESET);
+
+        char input[256];
+        if (fgets(input, sizeof(input), stdin) == NULL) {
+            printf("\n");
+            break; // Exit on EOF (Ctrl+D)
+        }
+
+        // Remove trailing newline
+        input[strcspn(input, "\n")] = 0;
+
+        char* command = strtok(input, " ");
+        if (command == NULL) {
+            continue; // No command entered
+        }
+
+        if (strcmp(command, "show") == 0) {
+            printf(YELLOW "Module Options:\n" RESET);
+            printf(" ------------------------------------------------------------\n\n");
+
+            printf("  " GREEN "%-12s" RESET RED "%-12s" RESET "%s\n",
+            "DOMAIN", "required", "The target domain to search for in crt.sh");
+
+            printf("\n ------------------------------------------------------------\n");
+
+        }
+
+        else if (strcmp(command, "set") == 0) {
+            char* option = strtok(NULL, " ");
+            char* value = strtok(NULL, " ");
+
+            if (option == NULL || value == NULL) {
+                printf(RED "Usage: set <option> <value>\n" RESET);
+                continue;
+            }
+            // DOMAIN option validation
+            if (strcmp(option, "DOMAIN") == 0) {
+                strncpy(target_domain, value, sizeof(target_domain));
+                target_domain[sizeof(target_domain) - 1] = '\0'; // Ensure null-termination
+                printf(GREEN "DOMAIN => %s\n" RESET, target_domain);
+            }
+
+            else {
+                printf(RED "Unknown option: %s\n" RESET, option);
+            }
+        }
+
+        else if (strcmp(command, "run") == 0) {
+            if (strlen(target_domain) == 0) {
+                printf(RED "Please set a valid DOMAIN before running the crt.sh module.\n" RESET);
+                continue;
+            }
+            printf(YELLOW "Running crt.sh module... (this might take a few seconds)\n" RESET);
+            start_crtsh_enumeration(target_domain);
+        }
+
+        else if (strcmp(command, "back") == 0) {
+            printf(YELLOW "Returning to main menu...\n" RESET);
+            break; // Exit the crt.sh menu
+        }
+
+        else {
+            printf(RED "Unknown command: %s\n" RESET, command);
+        }
+    }
+    return 0;
+}
+
 int main(int argc, char *argv[]) {
     (void)argc; // Unused parameter
     (void)argv; // Unused parameter
@@ -775,6 +848,7 @@ int main(int argc, char *argv[]) {
             printf("  " GREEN "%-18s" RESET "%s\n", "service_grabber", "Grab service information from open ports");
             printf("  " GREEN "%-18s" RESET "%s\n", "lan_sniffer", "Sniff LAN traffic on a specified interface");
             printf("  " GREEN "%-18s" RESET "%s\n", "arp_poisoner", "Perform ARP poisoning for MITM attacks");
+            printf("  " GREEN "%-18s" RESET "%s\n", "crtsh", "Enumerate subdomains using crt.sh certificate transparency logs");
             printf("\n");
 
             /* Basic Workflow */
@@ -816,6 +890,9 @@ int main(int argc, char *argv[]) {
             }
              else if (strcmp(tool, "arp_poisoner") == 0) {
                 handle_arp_poisoner();
+            }
+            else if (strcmp(tool, "crtsh") == 0) {
+                handle_crtsh();
             }
              else {
                 printf(RED "Unknown tool: %s\n" RESET, tool);

@@ -1,5 +1,6 @@
 CC=gcc
 CFLAGS=-Wall -Wextra -pedantic -Wno-format-truncation
+LDFLAGS=-lcurl
 INC=-Iinclude
 
 SRC= tools/port_scanner.c \
@@ -10,8 +11,9 @@ SRC= tools/port_scanner.c \
 	 tools/service_grabber.c \
 	 tools/lan_sniffer.c \
 	 tools/arp_poisoner.c \
+	 tools/crtsh.c \
 	 main.c
 OUT=reconx
 
 all:
-	$(CC) $(CFLAGS) $(SRC) $(INC) -o $(OUT)
+	$(CC) $(CFLAGS) $(SRC) $(INC) -o $(OUT) $(LDFLAGS)
