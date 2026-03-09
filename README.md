@@ -63,10 +63,10 @@ After launching, you will enter the interactive console:
 Command | Description |
 | --- | --- |
 help | Show available modules |
-use <module> | Select a module |
+use `module` | Select a module |
 exit | Exit ReconX |
 show history | Shows the history of which scans have been performed
-show scans <id> | Shows the results of the <id> scan |
+show scans `id` | Shows the results of the `id` scan |
 
 ### In-Module commands:
 
