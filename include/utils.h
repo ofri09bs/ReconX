@@ -12,5 +12,8 @@ int open_socket(const char* ip, int port);
 char* get_service_name(int service_type);
 void parse_mac(const char* mac_str, unsigned char* mac_bytes);
 int get_local_ip(const char* target_ip, char* local_ip_buffer);
+int init_database();
+int create_new_scan(const char* target, const char* scan_type, char* timestamp);
+int save_scan_result(int scan_id, const char* data, const char* extra_info);
 
 #endif // UTILS_H

@@ -7,9 +7,12 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <errno.h>
-#include <sys/time.h>
+#include <time.h>
+#include "utils.h"
 #include <fcntl.h>
 #include <pthread.h>
+#include "db_manager.h"
+
 
 #define RED     "\033[31m"
 #define GREEN   "\033[32m"
@@ -21,6 +24,7 @@ typedef struct {
     char domain[256];
     char subdomain[256];
     char ip[INET_ADDRSTRLEN];
+    int scan_id;
 } thread_data_t;
 
 
@@ -30,6 +34,9 @@ void *check_subdomain_thread(void *arg) {
     pthread_mutex_lock(&mutex);
     if (result) {
         printf(GREEN "[+] Subdomain found: %s.%s (%s)" RESET "\n", data->subdomain, data->domain, data->ip);
+        char full_domain[512];
+        snprintf(full_domain, sizeof(full_domain), "%s.%s", data->subdomain, data->domain);
+        save_scan_result(data->scan_id, full_domain, data->ip);
     } else {
         //printf(RED "[-] Subdomain not found: %s.%s" RESET "\n", data->subdomain, data->domain);
     }
@@ -158,6 +165,10 @@ int dns_enumerate(const char* domain, const char* wordlist_path, int thread_coun
         perror("fopen");
         return 0;
     }
+    char timestamp[20];
+    time_t now = time(NULL);
+    strftime(timestamp, sizeof(timestamp), "%Y-%m-%d %H:%M:%S", localtime(&now));
+    int scan_id = create_new_scan(domain, "DNS Enumeration", timestamp); // Create a new scan entry in the database
 
     pthread_mutex_init(&mutex, NULL);
     pthread_t threads[thread_count];
@@ -170,6 +181,7 @@ int dns_enumerate(const char* domain, const char* wordlist_path, int thread_coun
         thread_data_t* data = malloc(sizeof(thread_data_t));
         strncpy(data->domain, domain, sizeof(data->domain));
         strncpy(data->subdomain, subdomain, sizeof(data->subdomain));
+        data->scan_id = scan_id;
 
         pthread_create(&threads[thread_index++], NULL, check_subdomain_thread, data);
 

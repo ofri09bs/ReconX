@@ -6,11 +6,13 @@
 #include <stdlib.h>
 #include <arpa/inet.h>
 #include <sys/socket.h>
-#include <sys/time.h>
+#include <time.h>
 #include <netinet/ip.h>
 #include <netinet/ip_icmp.h>
 #include <pthread.h>
 #include <signal.h>
+#include "db_manager.h"
+
 
 #define NUM_THREADS 10
 #define GREEN   "\033[32m"
@@ -20,7 +22,9 @@
 pthread_mutex_t print_mutex_ping;
 
 void *check_ip_thread(void *arg) {
-    char *ip_str = (char *)arg;
+    thread_arg_t *thread_arg = (thread_arg_t *)arg;
+    char *ip_str = thread_arg->ip;
+    int scan_id = thread_arg->scan_id;
     int sockfd;
     struct sockaddr_in dest_addr, recv_addr;
     icmp_pkt icmp_pkt;
@@ -81,6 +85,10 @@ void *check_ip_thread(void *arg) {
 
             pthread_mutex_lock(&print_mutex_ping);
             printf(GREEN "[+] %s is alive\n" RESET, ip_str);
+            // Save result to database
+            char result_data[256];
+            snprintf(result_data, sizeof(result_data), "IP: %s is alive", ip_str);
+            save_scan_result(scan_id, result_data, "Alive");
             pthread_mutex_unlock(&print_mutex_ping);
             break;
 
@@ -102,7 +110,7 @@ void *scan_range_thread(void *arg) {
     for (int i = range->start_ip; i <= range->end_ip; i++) {
         char target_ip[32];
         snprintf(target_ip, 32, "%s.%d", base_ip, i);
-        check_ip_thread(target_ip);
+        check_ip_thread(&range->thread_arg);
     }
     free(range);
     return NULL;
@@ -122,6 +130,15 @@ int ping_sweep(const char *target_ip) {
         *last_dot = '\0'; 
     }
 
+    char timestamp[20];
+    time_t now = time(NULL);
+    strftime(timestamp, sizeof(timestamp), "%Y-%m-%d %H:%M:%S", localtime(&now));
+    int scan_id = create_new_scan(target_ip, "Ping Sweep", timestamp);
+
+    thread_arg_t thread_arg;
+    thread_arg.ip = target_ip_copy;
+    thread_arg.scan_id = scan_id;
+
     pthread_t threads[NUM_THREADS];
     pthread_mutex_init(&print_mutex_ping, NULL);
 
@@ -139,6 +156,7 @@ int ping_sweep(const char *target_ip) {
         strncpy(range->base_ip, target_ip_copy, 16);
         range->start_ip = start_ip;
         range->end_ip = end_ip;
+        range->thread_arg = thread_arg;
         if (pthread_create(&threads[i], NULL, scan_range_thread, range) != 0) {
             perror("pthread_create");
             free(range);

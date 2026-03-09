@@ -9,7 +9,11 @@
 #include <arpa/inet.h>
 #include <net/ethernet.h> 
 #include <netinet/ip.h>
+#include <time.h>
 #include "lan_sniffer.h"
+#include "utils.h"
+#include "db_manager.h"
+
 
 #define RED     "\033[31m"
 #define GREEN   "\033[32m"
@@ -30,7 +34,7 @@ int is_local_ip(uint32_t ip_addr) {
 }
 
 
-void register_and_print_host(char* ip_str, char* mac_str, int ttl) {
+void register_and_print_host(char* ip_str, char* mac_str, int ttl, int scan_id) {
     for (int i = 0; i < ip_count; i++) {
         if (strcmp(seen_ips[i], ip_str) == 0) {
             return; 
@@ -61,6 +65,9 @@ void register_and_print_host(char* ip_str, char* mac_str, int ttl) {
     }
 
     printf(GREEN "[+] New Host:" RESET YELLOW " %-15s | MAC: %s | OS: %s\n" RESET, ip_str, mac_str, os_guess);
+    char result_data[256];
+    snprintf(result_data, sizeof(result_data), "IP: %s, MAC: %s, TTL: %d", ip_str, mac_str, ttl);
+    save_scan_result(scan_id, result_data, os_guess);
 }
 
 // set the network interface to promiscuous mode to capture all traffic (not just traffic destined for the host)
@@ -102,6 +109,17 @@ void start_lan_sniffer(const char* iface) {
 
     printf("Listening for LAN traffic on interface %s...\n", iface);
 
+    char local_ip[INET_ADDRSTRLEN];
+    if (get_local_ip(iface, local_ip) < 0) {
+        fprintf(stderr, "Error: Could not determine local IP address for interface %s\n", iface);
+        close(sockfd);
+        exit(EXIT_FAILURE);
+    }
+    char timestamp[20];
+    time_t now = time(NULL);
+    strftime(timestamp, sizeof(timestamp), "%Y-%m-%d %H:%M:%S", localtime(&now));
+    int scan_id = create_new_scan(local_ip, "LAN Sniffer", timestamp);
+    
     while (1) {
         ssize_t data_size = recvfrom(sockfd, buffer, sizeof(buffer), 0, &saddr, &saddr_len);
         if (data_size < 0) {
@@ -132,10 +150,10 @@ void start_lan_sniffer(const char* iface) {
                      eth->ether_dhost[3], eth->ether_dhost[4], eth->ether_dhost[5]);
 
             if (is_local_ip(ip->saddr)) {
-                register_and_print_host(src_ip, src_mac, ip->ttl);
+                register_and_print_host(src_ip, src_mac, ip->ttl, scan_id);
             }
             if (is_local_ip(ip->daddr)) {
-                register_and_print_host(dst_ip, dst_mac, ip->ttl); 
+                register_and_print_host(dst_ip, dst_mac, ip->ttl, scan_id); 
             }
         }
     }

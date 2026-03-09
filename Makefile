@@ -1,7 +1,7 @@
 CC=gcc
 CFLAGS=-Wall -Wextra -pedantic -Wno-format-truncation
-LDFLAGS=-lcurl
-INC=-Iinclude
+LDFLAGS=-lcurl -lsqlite3 -lpthread
+INC=-Iinclude 
 
 SRC= tools/port_scanner.c \
 	 tools/utils.c \
@@ -12,6 +12,7 @@ SRC= tools/port_scanner.c \
 	 tools/lan_sniffer.c \
 	 tools/arp_poisoner.c \
 	 tools/crtsh.c \
+	 tools/db_manager.c \
 	 main.c
 OUT=reconx
 

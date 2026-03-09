@@ -11,6 +11,7 @@ typedef struct {
     const char *local_ip;
     int start_port;
     int end_port;
+    int scan_id;
 } scan_args_t;
 
 struct pseudo_header {

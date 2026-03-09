@@ -3,6 +3,6 @@
 
 int start_dir_buster(const char *ip, int port, const char *wordlist_path);
 int send_http_request(int sock, const char *path ,const char *ip);
-void *dirbuster_thread(void *args);
+void *dirbuster_thread(void* arg);
 
 #endif // DIR_BUSTER_H

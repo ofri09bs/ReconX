@@ -8,8 +8,9 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <errno.h>
-#include <sys/time.h>
+#include <time.h>
 #include <fcntl.h>
+#include "db_manager.h"
 
 #define RED     "\033[31m"
 #define GREEN   "\033[32m"
@@ -454,15 +455,23 @@ int grab_service_info(const char* ip, int port) {
     setsockopt(sockfd, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout));
     int service_type = SERVICE_UNKNOWN;
     bytes_received = recv(sockfd, buffer, sizeof(buffer) - 1, 0);
+
+    char timestamp[20];
+    time_t now = time(NULL);
+    strftime(timestamp, sizeof(timestamp), "%Y-%m-%d %H:%M:%S", localtime(&now));
+    int scan_id = create_new_scan(ip, "Service Grabber", timestamp);
+
     if (bytes_received > 0) {
         buffer[bytes_received] = '\0'; // Null-terminate the buffer
 
         if ((service_type = check_speaking_services(buffer)) != SERVICE_UNKNOWN) {
             char* service_name = get_service_name(service_type);
             printf("Service on %s:%d => " GREEN "%s" RESET YELLOW " (%s)\n" RESET, ip, port, service_name, buffer);
+            save_scan_result(scan_id, service_name, buffer);
         }
         else {
             printf("Service on %s:%d =>" YELLOW " Unknown Service\n" RESET, ip, port);
+            save_scan_result(scan_id, "Unknown Service", buffer);
         }
     }
     else if (bytes_received < 0 && (errno == EWOULDBLOCK || errno == EAGAIN)) {
@@ -471,20 +480,25 @@ int grab_service_info(const char* ip, int port) {
         if (service_type != SERVICE_UNKNOWN) {
             if (strlen(buffer) > 0) {
                 printf("Service on %s:%d => " GREEN "%s" RESET YELLOW " (%s)\n" RESET, ip, port, service_name, buffer);
+                save_scan_result(scan_id, service_name, buffer);
             }
             else {
                 printf("Service on %s:%d => " GREEN "%s" RESET "\n", ip, port, service_name);
+                save_scan_result(scan_id, service_name, "No additional info");
             }
         }
         else {
             printf("Service on %s:%d =>" YELLOW " Unknown Service\n" RESET, ip, port);
+            save_scan_result(scan_id, "Unknown Service", "No response or unrecognized response");
         }
     }
     else if (bytes_received == 0) {
         printf(RED "Service on %s:%d => Connection closed by server (TCP FIN)\n" RESET, ip, port);
+        save_scan_result(scan_id, "Unknown Service", "Connection closed by server (TCP FIN)");
     }
     else {
         printf(RED "Service on %s:%d => No response or error\n" RESET, ip, port);
+        save_scan_result(scan_id, "Unknown Service", "No response or error");
     }
 
     close(sockfd);

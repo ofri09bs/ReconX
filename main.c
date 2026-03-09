@@ -7,6 +7,7 @@
 #include "lan_sniffer.h"
 #include "arp_poisoner.h"
 #include "crtsh.h"
+#include "db_manager.h"
 #include <stdio.h>
 #include <string.h>
 #include <stddef.h>
@@ -803,6 +804,7 @@ int main(int argc, char *argv[]) {
 
     printf(BLUE "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n" RESET);
 
+    init_database();
     // new CLI parsing logic
     while(1) {
         printf(BOLD CYAN "reconx > " RESET);
@@ -837,6 +839,7 @@ int main(int argc, char *argv[]) {
             printf("  " GREEN "%-18s" RESET "%s\n", "help", "Show this help menu");
             printf("  " GREEN "%-18s" RESET "%s\n", "use <module>", "Select a module");
             printf("  " GREEN "%-18s" RESET "%s\n", "exit", "Exit ReconX");
+            printf("  " GREEN "%-18s" RESET "%s\n", "show <table_name> <id>", "Show data from the database");
             printf("\n");
 
             /* Available Modules */
@@ -863,12 +866,12 @@ int main(int argc, char *argv[]) {
             continue;
         }
 
-        if (strcmp(command, "exit") == 0) {
+        else if (strcmp(command, "exit") == 0) {
             printf(YELLOW "Exiting ReconX. Goodbye!\n" RESET);
             break;
         }
 
-        if (strcmp(command, "use") == 0) {
+        else if (strcmp(command, "use") == 0) {
             
             if (strcmp(tool, "port_scanner") == 0) {
                 handle_port_scanner();
@@ -896,10 +899,44 @@ int main(int argc, char *argv[]) {
             }
              else {
                 printf(RED "Unknown tool: %s\n" RESET, tool);
+                printf("Send 'help' for available tools.\n");
             }
         }
+
+        else if(strcmp(command, "show") == 0) {
+            char* type = tool;
+
+            if (type == NULL) {
+                printf(RED "Usage:\n  show history     - List all previous scans\n  show scans <id>  - Show results for a specific scan\n" RESET);
+                continue;
+            }
+
+            if (strcmp(type, "history") == 0) {
+                show_scan_history();
+            }
+            else if (strcmp(type, "scans") == 0) {
+                char* id_str = strtok(NULL, " ");
+                
+                if (id_str == NULL) {
+                    printf(RED "Usage: show scans <id>\n" RESET);
+                    continue;
+                }
+
+                int id = atoi(id_str);
+                if (id <= 0) {
+                    printf(RED "Invalid Scan ID\n" RESET);
+                    continue;
+                }
+
+                show_scan_report(id); 
+            }
+            else {
+                printf(RED "Unknown show command. Use 'show history' or 'show scans <id>'\n" RESET);
+            }
+        }
+        
         else {
-            printf(RED "Unknown command: %s\n" RESET, command);
+            printf(RED "Unknown command: %s\nSend 'help' for available commands.\n" RESET, command);
         }
     }
 

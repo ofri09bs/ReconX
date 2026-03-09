@@ -2,7 +2,10 @@
 #include <stdlib.h>
 #include <string.h>
 #include <curl/curl.h>
+#include <time.h>
 #include "crtsh.h"
+#include "utils.h"
+#include "db_manager.h"
 
 #define RED     "\033[31m"
 #define GREEN   "\033[32m"
@@ -58,9 +61,12 @@ void reset_subdomains() {
     found_count = 0;
 }
 
-int parse_response(const char *response) {
+int parse_response(const char *response,const char* domain) {
     const char *token = response;
-    
+    char timestamp[20];
+    time_t now = time(NULL);
+    strftime(timestamp, sizeof(timestamp), "%Y-%m-%d %H:%M:%S", localtime(&now));
+    int scan_id = create_new_scan(domain, "crt.sh Enumeration", timestamp);
     while ((token = strstr(token, "\"name_value\":\"")) != NULL) {
         token += strlen("\"name_value\":\"");
         const char *end = strchr(token, '"');     
@@ -89,6 +95,7 @@ int parse_response(const char *response) {
                     found_subdomains = realloc(found_subdomains, (found_count + 1) * sizeof(char *));
                     found_subdomains[found_count] = strdup(clean_line);
                     printf(GREEN "[+] Found: %s" RESET "\n", clean_line);
+                    save_scan_result(scan_id, clean_line, "crt.sh Enumeration");
                     found_count++;
                 }
                 
@@ -127,7 +134,7 @@ int start_crtsh_enumeration(const char *domain) {
 
     Memory response = {0};
     if (send_https_request(url, &response) == 0) {
-        int result = parse_response(response.data);
+        int result = parse_response(response.data, domain);
         printf(YELLOW "[*] Found %d unique subdomains." RESET "\n", found_count);
         free(response.data);
         return result;

@@ -10,9 +10,15 @@ typedef struct {
 } icmp_pkt;
 
 typedef struct {
+    char* ip;
+    int scan_id;
+} thread_arg_t;
+
+typedef struct {
     char base_ip[16];
     int start_ip;
     int end_ip;
+    thread_arg_t thread_arg;
 } scan_range_t;
 
 int ping_sweep(const char *target_ip);

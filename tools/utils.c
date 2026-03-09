@@ -8,7 +8,15 @@
 #include <errno.h>
 #include <sys/time.h>
 #include <fcntl.h>
+#include <sqlite3.h>
 #include "service_grabber.h"
+
+#define DATABASE_PATH "reconx.db"
+
+#define RED     "\033[31m"
+#define GREEN   "\033[32m"
+#define YELLOW  "\033[33m"
+#define RESET   "\033[0m"
 
 char* get_service_name(int service_type) {
     switch (service_type) {

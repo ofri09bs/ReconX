@@ -8,9 +8,11 @@
 #include <errno.h>
 #include <sys/time.h>
 #include <fcntl.h>
+#include <time.h>
 #include <pthread.h>
 #include "utils.h"
 #include "dir_buster.h"
+#include "db_manager.h"
 
 #define MAX_WORDS 10000
 #define NUM_THREADS 20  // Number of concurrent threads
@@ -48,8 +50,8 @@ int send_http_request(int sock, const char *path ,const char *ip) {
     return -1;
 }
 
-void *dirbuster_thread(void *args) {
-    (void)args; // Unused parameter
+void *dirbuster_thread(void* arg) {
+    int scan_id = *(int*)arg;
     while(1) {
         char *word_to_test = NULL;
 
@@ -87,6 +89,10 @@ void *dirbuster_thread(void *args) {
              // Send Request
             if (send_http_request(sock, word_to_test, target_ip) == 0) {
                 printf("[+] %s:%d/\033[32m%s\033[0m - Found\n", target_ip, target_port, word_to_test);
+                // Save result to database
+                char result_data[256];
+                snprintf(result_data, sizeof(result_data), "%s:%d/%s", target_ip, target_port, word_to_test);
+                save_scan_result(scan_id, result_data, "Directory found");
             }
         }
         
@@ -101,6 +107,10 @@ int start_dir_buster(const char *ip, int port, const char *wordlist_path) {
     target_port = port;
     current_index = 0;
     word_count = 0;
+    char timestamp[20];
+    time_t now = time(NULL);
+    strftime(timestamp, sizeof(timestamp), "%Y-%m-%d %H:%M:%S", localtime(&now));
+    int scan_id = create_new_scan(ip, "Directory Buster", timestamp);
     
     pthread_mutex_init(&index_mutex, NULL);
 
@@ -125,7 +135,7 @@ int start_dir_buster(const char *ip, int port, const char *wordlist_path) {
     // 3. Create Thread Pool
     pthread_t threads[NUM_THREADS];
     for (int i = 0; i < NUM_THREADS; i++) {
-        if (pthread_create(&threads[i], NULL, dirbuster_thread, NULL) != 0) {
+        if (pthread_create(&threads[i], NULL, dirbuster_thread, (void*)&scan_id) != 0) {
             perror("Failed to create thread");
         }
     }

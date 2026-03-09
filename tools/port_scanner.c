@@ -11,11 +11,13 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <errno.h>
-#include <sys/time.h>
+#include <time.h>
 #include <fcntl.h>
 #include <pthread.h>
 #include "utils.h"
 #include "port_scanner.h"
+#include "db_manager.h"
+
 
 #define RED     "\033[31m"
 #define GREEN   "\033[32m"
@@ -148,6 +150,9 @@ void *scan_ports_thread(void *args) {
         if (scan_port(scan_args->ip, port, service) == 0) {
             pthread_mutex_lock(&print_mutex);
             printf(BLUE "%d" RESET "/tcp " GREEN "OPEN" RESET " %s\n", port, service);
+            char result_data[256];
+            snprintf(result_data, sizeof(result_data), "Port: %d Open, Service: %s", port, service);
+            save_scan_result(scan_args->scan_id, result_data, "TCP Connect Scan");
             pthread_mutex_unlock(&print_mutex);
         }
     }
@@ -256,6 +261,9 @@ void *syn_scan_ports_thread(void *args) {
         if (syn_scan_port(scan_args->local_ip, scan_args->ip, port) == 0) {
             pthread_mutex_lock(&print_mutex);
             printf(BLUE "%d" RESET "/tcp " GREEN "OPEN" RESET " Unknown\n", port);
+            char result_data[256];
+            snprintf(result_data, sizeof(result_data), "Port: %d Open, Service: Unknown", port);
+            save_scan_result(scan_args->scan_id, result_data, "SYN Scan");
             pthread_mutex_unlock(&print_mutex);
         }
     }
@@ -302,6 +310,10 @@ int scan_ports(const char *ip, char *ports , int thread_count, int syn_scan) {
 
     printf("\033[33mPORT\033[0m   \033[33mSTATE\033[0m \033[33mSERVICE\033[0m\n");
 
+    char timestamp[64];
+    time_t now = time(NULL);
+    strftime(timestamp, sizeof(timestamp), "%Y-%m-%d %H:%M:%S", localtime(&now));
+    int scan_id = create_new_scan(ip, syn_scan ? "SYN Port Scan" : "TCP Connect Scan", timestamp);
 
     pthread_t threads[thread_count];
     scan_args_t thread_args[thread_count];
@@ -320,6 +332,7 @@ int scan_ports(const char *ip, char *ports , int thread_count, int syn_scan) {
             thread_args[i].local_ip = local_ip;
             thread_args[i].start_port = start_port_num + (i * ports_per_thread);
             thread_args[i].end_port = (i == thread_count - 1) ? end_port_num : start_port_num + ((i + 1) * ports_per_thread) - 1;
+            thread_args[i].scan_id = scan_id;
             pthread_create(&threads[i], NULL, syn_scan_ports_thread, &thread_args[i]);
         }
     }
@@ -329,6 +342,7 @@ int scan_ports(const char *ip, char *ports , int thread_count, int syn_scan) {
             thread_args[i].local_ip = local_ip;
             thread_args[i].start_port = start_port_num + (i * ports_per_thread);
             thread_args[i].end_port = (i == thread_count - 1) ? end_port_num : start_port_num + ((i + 1) * ports_per_thread) - 1;
+            thread_args[i].scan_id = scan_id;
             pthread_create(&threads[i], NULL, scan_ports_thread, &thread_args[i]);
         }
     }
