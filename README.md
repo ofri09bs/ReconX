@@ -1,13 +1,12 @@
-# ReconX v2.4 - Network Reconnaissance Tool
+# ReconX v2.5 - Network Reconnaissance Tool
 
 **ReconX** is a lightweight, **multithreaded** network **reconnaissance** tool written in C. It combines a high-speed **Port Scanner with SYN Scan** , **Directory Buster** , **Ping Sweeper** , **DNS Enumerator**, **Services Grabber**, **LAN Sniffer** ,**ARP Poisoner** and a **crt.sh Enumerator** into a single CLI utility, designed for CTFs, penetration testing, and educational purposes.
 
 ## Features
-
+* **SQLite Database**: SQLite-backed scan history to store and query past reconnaissance results.
 * **Multithreaded Port Scanner**: fast TCP connect scanning using 15 concurrent threads by default , can also do a stealthy SYN Scan
 * **Service Version Detection**: Automatically identifies common services (SSH, HTTP, FTP, SMTP, POP3, IMAP) via banner grabbing.
 * **Directory Buster**: specific module to brute-force web server directories using a wordlist.
-* **Flexible Scanning**: Supports both Top 1024 ports and full range (1-65535) scanning.
 * **Advanced Interactive CLI**: Metasploit-inspired modular interface with dynamic prompts, structured module options, and clean colorized output.
 * **Ping Sweeper**: fast, multithreaded ping sweeper , checks every IP in range of a given IP
 * **DNS Enumerator**: Scans quickly DNS Subdomains of a given domain
@@ -30,6 +29,7 @@
 │   ├── lan_sniffer.c
 │   ├── arp_poisoner.c
 │   ├── crtsh.c
+│   ├── db_manager.c
 │   └── utils.c
 ├── main.c             # Entry point and argument parsing
 ├── Makefile           # Build configuration
@@ -58,11 +58,20 @@ After launching, you will enter the interactive console:
 ``` reconx > ```
 
 ### Core Commands
+# Main menu commands: 
+
 Command | Description |
 | --- | --- |
 help | Show available modules |
 use <module> | Select a module |
 exit | Exit ReconX |
+show history | Shows the history of which scans have been performed
+show scans <id> | Shows the results of the <id> scan |
+
+# In-Module commands:
+
+Command | Description |
+| --- | --- |
 show | Shows the available values to set in the selected module |
 set | Sets a value inside a module | 
 run | Runs the selected module with the selected options |

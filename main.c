@@ -839,7 +839,8 @@ int main(int argc, char *argv[]) {
             printf("  " GREEN "%-18s" RESET "%s\n", "help", "Show this help menu");
             printf("  " GREEN "%-18s" RESET "%s\n", "use <module>", "Select a module");
             printf("  " GREEN "%-18s" RESET "%s\n", "exit", "Exit ReconX");
-            printf("  " GREEN "%-18s" RESET "%s\n", "show <table_name> <id>", "Show data from the database");
+            printf("  " GREEN "%-18s" RESET "%s\n", "show history", "List all previous scans");
+            printf("  " GREEN "%-18s" RESET "%s\n", "show scans <id>", "Show results for a specific scan");
             printf("\n");
 
             /* Available Modules */
