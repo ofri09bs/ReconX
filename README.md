@@ -57,8 +57,8 @@ Run the tool from the terminal. ReconX now uses an interactive, metasploit-style
 After launching, you will enter the interactive console:
 ``` reconx > ```
 
-### Core Commands
-# Main menu commands: 
+## Core Commands
+### Main menu commands: 
 
 Command | Description |
 | --- | --- |
@@ -68,7 +68,7 @@ exit | Exit ReconX |
 show history | Shows the history of which scans have been performed
 show scans <id> | Shows the results of the <id> scan |
 
-# In-Module commands:
+### In-Module commands:
 
 Command | Description |
 | --- | --- |
@@ -78,7 +78,7 @@ run | Runs the selected module with the selected options |
 back | Goes back to the main menu |
 
 
-### Available Modules
+## Available Modules
 Module | Description |
 | --- | --- |
 port_scanner | Scan for open TCP ports |
