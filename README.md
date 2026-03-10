@@ -1,6 +1,13 @@
 # ReconX v2.5 - Network Reconnaissance Tool
 
-**ReconX** is a lightweight, **multithreaded** network **reconnaissance** tool written in C. It combines a high-speed **Port Scanner with SYN Scan** , **Directory Buster** , **Ping Sweeper** , **DNS Enumerator**, **Services Grabber**, **LAN Sniffer** ,**ARP Poisoner** and a **crt.sh Enumerator** into a single CLI utility, designed for CTFs, penetration testing, and educational purposes.
+![GitHub stars](https://img.shields.io/github/stars/ofri09bs/reconx?style=flat-square)
+![GitHub forks](https://img.shields.io/github/forks/ofri09bs/reconx?style=flat-square)
+![GitHub issues](https://img.shields.io/github/issues/ofri09bs/reconx?style=flat-square)
+![License](https://img.shields.io/badge/license-MIT-blue?style=flat-square)
+
+**ReconX** is a lightweight, **multithreaded** network **reconnaissance** tool written in C. It combines a high-speed **Port Scanner (with SYN Scan)**, **Directory Buster**, **Ping Sweeper**, **DNS Enumerator**, **Services Grabber**, **LAN Sniffer**, **ARP Poisoner**, and a **crt.sh Enumerator** into a single CLI utility. 
+
+Designed for CTFs, penetration testing, and educational purposes, ReconX gives you all the essential recon capabilities without the overhead of running multiple different tools.
 
 ## Features
 * **SQLite Database**: SQLite-backed scan history to store and query past reconnaissance results.
@@ -10,8 +17,8 @@
 * **Advanced Interactive CLI**: Metasploit-inspired modular interface with dynamic prompts, structured module options, and clean colorized output.
 * **Ping Sweeper**: fast, multithreaded ping sweeper , checks every IP in range of a given IP
 * **DNS Enumerator**: Scans quickly DNS Subdomains of a given domain
-* **Service Grabber**: Makes a comprehensive scan on a port and checking for 17 diffrent popular services (HTTP/S, SSH, FTP, SMTP, SMB, MYSQL, REDIS and more..)
-* **LAN Sniffer**: Sniffes packets in the host network and extracts from them the MAC and IP addresses (that are from/to the host network)
+* **Service Grabber**: Makes a comprehensive scan on a port and checking for 17 different popular services (HTTP/S, SSH, FTP, SMTP, SMB, MYSQL, REDIS and more..)
+* **LAN Sniffer**: Sniffs packets in the host network and extracts from them the MAC and IP addresses (that are from/to the host network)
 * **ARP Poisoner**: Sends ARP replies on the local network to manipulate IP-to-MAC mappings between devices, And then acts as a MiTM and sniffes packets
 * **crtsh**: Enumerate subdomains using crt.sh certificate transparency logs
 
@@ -90,11 +97,20 @@ lan_sniffer | Sniffs the LAN and prints MAC and IP addresses |
 arp_poisoner | Manipulates IP-to-MAC mappings between devices and sniffes packets |
 crtsh | Enumerate subdomains using crt.sh |
 
-*More comming soon..!*
+*More coming soon..!*
 
 ## Demo
 ![Video Project 3 (1)](https://github.com/user-attachments/assets/3706feb6-a0d7-4f82-b99e-e179eb57e14e)
 
+
+## 💡 Feedback, Ideas & Contact
+I am actively developing ReconX and I'm **always open to new ideas, feature requests, and suggestions!** If you have a cool idea for a new module or found a bug:
+
+* **Open an Issue**: Feel free to open an issue on this repository for feature requests or bug reports.
+
+* **Reach Out**: You can contact me directly via Discord (ofri404) or connect with me on [LinkedIn](https://www.linkedin.com/in/ofri-ben-simon-495256395/).
+
+Contributions are always welcome. If you want to add a feature, just fork the repo, create a branch, and submit a Pull Request.
 
 
 ## ⚠️ Disclaimer
