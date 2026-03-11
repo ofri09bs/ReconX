@@ -11,5 +11,7 @@ int print_callback(void *data, int argc, char **argv, char **azColName);
 int show_scan_report(int scan_id);
 int show_scan_history();
 void reset_database();
+int export_scan_report(int scan_id, const char *filename);
+int export_scan_report_range(int start_id, int end_id, const char *filename);
 
 #endif // DB_MANAGER_H

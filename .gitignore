@@ -3,3 +3,4 @@ build/
 reconx
 *.o
 *.db
+*.html

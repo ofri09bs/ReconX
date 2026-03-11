@@ -799,8 +799,8 @@ int main(int argc, char *argv[]) {
     printf("╚═╝  ╚═╝╚══════╝ ╚═════╝ ╚═════╝ ╚═╝  ╚═══╝╚═╝  ╚═╝\n");
     printf(RESET);
 
-    printf(BOLD GREEN "        ReconX Network Scanner v2.3\n" RESET);
-    printf(YELLOW "        Author: ofribs\n\n" RESET);
+    printf(BOLD GREEN "        ReconX Network Scanner v2.5\n" RESET);
+    printf(YELLOW "        Author: ofri09bs\n\n" RESET);
 
     printf(BLUE "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n" RESET);
 
@@ -841,6 +841,7 @@ int main(int argc, char *argv[]) {
             printf("  " GREEN "%-18s" RESET "%s\n", "exit", "Exit ReconX");
             printf("  " GREEN "%-18s" RESET "%s\n", "show history", "List all previous scans");
             printf("  " GREEN "%-18s" RESET "%s\n", "show scans <id>", "Show results for a specific scan");
+            printf("  " GREEN "%-18s" RESET "%s\n", "export <id range> <filename.html>", "Export scan reports to HTML");
             printf("\n");
 
             /* Available Modules */
@@ -935,7 +936,42 @@ int main(int argc, char *argv[]) {
                 printf(RED "Unknown show command. Use 'show history' or 'show scans <id>'\n" RESET);
             }
         }
-        
+        else if (strcmp(command, "export") == 0) {
+            char* range = tool; 
+            char* filename = strtok(NULL, " ");
+
+            if (filename == NULL) {
+                filename = "report.html"; // Default filename
+            }
+
+            if (range == NULL || filename == NULL) {
+                printf(RED "Usage: export <id range> <filename.html>\n" RESET);
+                printf(YELLOW "Example: export 2-4 report.html\n" RESET);
+                continue;
+            }
+
+            char* dash = strchr(range, '-');
+            if (dash == NULL) {
+                int scan_id = atoi(range); // Single ID export
+                if (scan_id <= 0) {
+                    printf(RED "Invalid Scan ID\n" RESET);
+                    continue;
+                }
+                export_scan_report(scan_id, filename);
+            }
+
+            else{
+                *dash = '\0';
+                int start_id = atoi(range);
+                int end_id = atoi(dash + 1);
+                if (start_id <= 0 || end_id <= 0 || start_id > end_id) {
+                    printf(RED "Invalid Scan ID range\n" RESET);
+                    continue;
+                }
+                export_scan_report_range(start_id, end_id, filename);  
+            }
+        }
+
         else {
             printf(RED "Unknown command: %s\nSend 'help' for available commands.\n" RESET, command);
         }
