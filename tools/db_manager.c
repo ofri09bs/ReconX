@@ -95,7 +95,7 @@ int create_new_scan(const char* target, const char* scan_type, char* timestamp) 
     }
 
     int scan_id = (int)sqlite3_last_insert_rowid(db);
-    printf("[DEBUG] Created new scan with ID: %d\n", scan_id);
+    //printf("[DEBUG] Created new scan with ID: %d\n", scan_id);
     sqlite3_close(db);
     return scan_id;
 }
@@ -122,7 +122,7 @@ int save_scan_result(int scan_id, const char* data, const char* extra_info) {
         return -1;
     }
 
-    printf("[DEBUG] Saved scan result to database: %s\n", data);
+    //printf("[DEBUG] Saved scan result to database: %s\n", data);
 
     sqlite3_close(db);
     return 0;
